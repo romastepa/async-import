@@ -9,9 +9,9 @@ use Magento\AsynchronousImportApi\Model\ConvertingRuleProcessorInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
- * Converts StoreViewCode to Store Id
+ * Converts StoreViewName to Store Id
  */
-class StoreViewCodeToId implements ConvertingRuleProcessorInterface
+class WebsiteNameToId implements ConvertingRuleProcessorInterface
 {
     /**
      * Store manager instance.
@@ -23,7 +23,7 @@ class StoreViewCodeToId implements ConvertingRuleProcessorInterface
     /**
      * @var array
      */
-    protected $storeCodeToId;
+    protected $websiteNameToId;
 
     /**
      * StoreViewCodeToId constructor.
@@ -38,7 +38,7 @@ class StoreViewCodeToId implements ConvertingRuleProcessorInterface
     /**
      * Executes converting rule
      *
-     * Takes apply_to columns and converts values StoreViewCode to StoreId.
+     * Takes apply_to columns and converts values WebsiteName to WebsiteId.
      *
      * @param ImportDataInterface $importData
      * @param ConvertingRuleInterface $convertingRule
@@ -53,12 +53,12 @@ class StoreViewCodeToId implements ConvertingRuleProcessorInterface
         if ($applyTo === []) {
             return $importData;
         }
-        $this->initStores();
+        $this->initWebsites();
         $rows = $importData->getData();
 
         foreach ($applyTo as $column) {
             foreach ($rows as &$row) {
-                $row[$column] = $this->getStoreId($row[$column], $column);
+                $row[$column] = $this->getWebsiteId($row[$column], $column);
             }
         }
 
@@ -66,25 +66,25 @@ class StoreViewCodeToId implements ConvertingRuleProcessorInterface
     }
 
     /**
-     * Gets StoreID by StoreCode
+     * Gets WebsiteId by WebsiteName
      *
-     * @param $storeCode
+     * @param $websiteName
      * @param $column
      *
      * @return int
      */
-    protected function getStoreId($storeCode, $column)
+    protected function getWebsiteId($websiteName, $column)
     {
-        $storeCode = mb_strtolower($storeCode);
-        if (!isset($this->storeCodeToId[$storeCode])) {
+        $storeCode = mb_strtolower($websiteName);
+        if (!isset($this->websiteNameToId[$websiteName])) {
             throw new NotFoundException(__(
-                'The converting rule apply_to cannot be applied to the column: "%column". Store code "%code%" not exists', [
+                'The converting rule apply_to cannot be applied to the column: "%column". WebsiteName "%code%" not exists', [
                     'column' => $column,
-                    'code' => $storeCode
+                    'code' => $websiteName
             ]));
         }
 
-        return $this->storeManager[$storeCode];
+        return $this->storeManager[$websiteName];
     }
 
     /**
@@ -92,10 +92,10 @@ class StoreViewCodeToId implements ConvertingRuleProcessorInterface
      *
      * @return $this
      */
-    protected function initStores()
+    protected function initWebsites()
     {
-        foreach ($this->storeManager->getStores() as $store) {
-            $this->storeCodeToId[$store->getCode()] = $store->getId();
+        foreach ($this->storeManager->getWebsites() as $website) {
+            $this->websiteNameToId[$website->getName()] = $website->getId();
         }
         return $this;
     }

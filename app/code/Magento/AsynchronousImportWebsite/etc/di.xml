@@ -5,6 +5,7 @@
         <arguments>
             <argument name="ruleProcessors" xsi:type="array">
                 <item name="store_view_code_to_id" xsi:type="object">Magento\AsynchronousImportWebsite\Model\Import\ConvertingRule\StoreViewCodeToId</item>
+                <item name="website_name_to_id" xsi:type="object">Magento\AsynchronousImportWebsite\Model\Import\ConvertingRule\WebsiteNameToId</item>
             </argument>
         </arguments>
     </type>
