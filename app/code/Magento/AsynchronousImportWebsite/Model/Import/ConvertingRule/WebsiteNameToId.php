@@ -75,7 +75,6 @@ class WebsiteNameToId implements ConvertingRuleProcessorInterface
      */
     protected function getWebsiteId($websiteName, $column)
     {
-        $storeCode = mb_strtolower($websiteName);
         if (!isset($this->websiteNameToId[$websiteName])) {
             throw new NotFoundException(__(
                 'The converting rule apply_to cannot be applied to the column: "%column". WebsiteName "%code%" not exists', [
