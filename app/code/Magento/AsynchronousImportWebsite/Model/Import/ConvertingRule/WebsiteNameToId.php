@@ -83,7 +83,7 @@ class WebsiteNameToId implements ConvertingRuleProcessorInterface
             ]));
         }
 
-        return $this->storeManager[$websiteName];
+        return $this->websiteNameToId[$websiteName];
     }
 
     /**
