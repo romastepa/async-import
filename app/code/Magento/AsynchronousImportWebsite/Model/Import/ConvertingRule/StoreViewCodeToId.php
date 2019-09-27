@@ -75,7 +75,6 @@ class StoreViewCodeToId implements ConvertingRuleProcessorInterface
      */
     protected function getStoreId($storeCode, $column)
     {
-        $storeCode = mb_strtolower($storeCode);
         if (!isset($this->storeCodeToId[$storeCode])) {
             throw new NotFoundException(__(
                 'The converting rule apply_to cannot be applied to the column: "%column". Store code "%code%" not exists', [
