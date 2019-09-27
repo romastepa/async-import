@@ -9,7 +9,7 @@ use Magento\AsynchronousImportApi\Model\ConvertingRuleProcessorInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
- * Converts StoreViewName to Store Id
+ * Converts WebsiteName to Website Id
  */
 class WebsiteNameToId implements ConvertingRuleProcessorInterface
 {
@@ -26,7 +26,7 @@ class WebsiteNameToId implements ConvertingRuleProcessorInterface
     protected $websiteNameToId;
 
     /**
-     * StoreViewCodeToId constructor.
+     * WebsiteNameToId constructor.
      *
      * @param StoreManagerInterface $storeManager
      */
@@ -87,7 +87,7 @@ class WebsiteNameToId implements ConvertingRuleProcessorInterface
     }
 
     /**
-     * Initialize stores hash.
+     * Initialize websites hash.
      *
      * @return $this
      */
