@@ -26,7 +26,7 @@ class WebsiteCodeToId implements ConvertingRuleProcessorInterface
     protected $websiteCodeToId;
 
     /**
-     * StoreViewCodeToId constructor.
+     * WebsiteCodeToId constructor.
      *
      * @param StoreManagerInterface $storeManager
      */
@@ -83,7 +83,7 @@ class WebsiteCodeToId implements ConvertingRuleProcessorInterface
             ]));
         }
 
-        return $this->storeManager[$websiteCode];
+        return $this->websiteCodeToId[$websiteCode];
     }
 
     /**
