@@ -3,15 +3,14 @@ declare(strict_types=1);
 
 namespace Magento\AsynchronousImportWebsite\Model\Import\ConvertingRule;
 
-use Magento\AsynchronousImportApi\Api\Data\ConvertingRuleInterface;
-use Magento\AsynchronousImportApi\Api\Data\ImportDataInterface;
-use Magento\AsynchronousImportApi\Model\ConvertingRuleProcessorInterface;
+use Magento\AsynchronousImportDataConvertingApi\Api\Data\ConvertingRuleInterface;
+use Magento\AsynchronousImportDataConvertingApi\Model\ApplyConvertingRuleStrategyInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
- * Converts StoreViewName to Store Id
+ * Converts WebsiteName to Website Id
  */
-class WebsiteNameToId implements ConvertingRuleProcessorInterface
+class WebsiteNameToId implements ApplyConvertingRuleStrategyInterface
 {
     /**
      * Store manager instance.
@@ -26,7 +25,7 @@ class WebsiteNameToId implements ConvertingRuleProcessorInterface
     protected $websiteNameToId;
 
     /**
-     * StoreViewCodeToId constructor.
+     * WebsiteNameToId constructor.
      *
      * @param StoreManagerInterface $storeManager
      */
@@ -40,29 +39,28 @@ class WebsiteNameToId implements ConvertingRuleProcessorInterface
      *
      * Takes apply_to columns and converts values WebsiteName to WebsiteId.
      *
-     * @param ImportDataInterface $importData
+     * @param array $importData
      * @param ConvertingRuleInterface $convertingRule
-     * @return ImportDataInterface
+     * @return array
      */
     public function execute(
-        ImportDataInterface $importData,
+        array $importData,
         ConvertingRuleInterface $convertingRule
-    ): ImportDataInterface
-    {
-        $applyTo = $convertingRule->getApplyTo() ?? [];
-        if ($applyTo === []) {
-            return $importData;
-        }
-        $this->initWebsites();
-        $rows = $importData->getData();
+    ): array {
+        $applyTo = $convertingRule->getApplyTo();
 
-        foreach ($applyTo as $column) {
-            foreach ($rows as &$row) {
-                $row[$column] = $this->getWebsiteId($row[$column], $column);
+        $this->initWebsites();
+
+        foreach ($importData as &$row) {
+            foreach ($applyTo as $columnName) {
+                if (isset($row[$columnName])) {
+                    $row[$columnName] = $this->getWebsiteId($row[$columnName], $columnName);
+                }
             }
         }
+        unset($row);
 
-        return $importData->{ImportDataInterface::DATA} = $rows;
+        return $importData;
     }
 
     /**
@@ -77,23 +75,25 @@ class WebsiteNameToId implements ConvertingRuleProcessorInterface
     {
         if (!isset($this->websiteNameToId[$websiteName])) {
             throw new NotFoundException(__(
-                'The converting rule apply_to cannot be applied to the column: "%column". WebsiteName "%code%" not exists', [
+                'The converting rule apply_to cannot be applied to the column: "%column". WebsiteName "%code%" not exists',
+                [
                     'column' => $column,
                     'code' => $websiteName
-            ]));
+                ]
+            ));
         }
 
-        return $this->storeManager[$websiteName];
+        return $this->websiteNameToId[$websiteName];
     }
 
     /**
-     * Initialize stores hash.
+     * Initialize websites hash.
      *
      * @return $this
      */
     protected function initWebsites()
     {
-        foreach ($this->storeManager->getWebsites() as $website) {
+        foreach ($this->storeManager->getWebsites(true) as $website) {
             $this->websiteNameToId[$website->getName()] = $website->getId();
         }
         return $this;

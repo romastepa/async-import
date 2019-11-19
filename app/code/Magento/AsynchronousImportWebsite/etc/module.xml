@@ -4,8 +4,7 @@
     <module name="Magento_AsynchronousImportWebsite">
         <sequence>
             <module name="Magento_Store"/>
-            <module name="Magento_AsynchronousImport"/>
-            <module name="Magento_AsynchronousImportApi"/>
+            <module name="Magento_AsynchronousImportDataConvertingApi"/>
         </sequence>
     </module>
 </config>
