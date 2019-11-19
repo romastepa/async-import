@@ -3,15 +3,14 @@ declare(strict_types=1);
 
 namespace Magento\AsynchronousImportWebsite\Model\Import\ConvertingRule;
 
-use Magento\AsynchronousImportApi\Api\Data\ConvertingRuleInterface;
-use Magento\AsynchronousImportApi\Api\Data\ImportDataInterface;
-use Magento\AsynchronousImportApi\Model\ConvertingRuleProcessorInterface;
+use Magento\AsynchronousImportDataConvertingApi\Api\Data\ConvertingRuleInterface;
+use Magento\AsynchronousImportDataConvertingApi\Model\ApplyConvertingRuleStrategyInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Converts StoreViewCode to Store Id
  */
-class StoreViewCodeToId implements ConvertingRuleProcessorInterface
+class StoreViewCodeToId implements ApplyConvertingRuleStrategyInterface
 {
     /**
      * Store manager instance.
@@ -40,29 +39,28 @@ class StoreViewCodeToId implements ConvertingRuleProcessorInterface
      *
      * Takes apply_to columns and converts values StoreViewCode to StoreId.
      *
-     * @param ImportDataInterface $importData
+     * @param array $importData
      * @param ConvertingRuleInterface $convertingRule
-     * @return ImportDataInterface
+     * @return array
      */
     public function execute(
-        ImportDataInterface $importData,
+        array $importData,
         ConvertingRuleInterface $convertingRule
-    ): ImportDataInterface
-    {
-        $applyTo = $convertingRule->getApplyTo() ?? [];
-        if ($applyTo === []) {
-            return $importData;
-        }
-        $this->initStores();
-        $rows = $importData->getData();
+    ): array {
+        $applyTo = $convertingRule->getApplyTo();
 
-        foreach ($applyTo as $column) {
-            foreach ($rows as &$row) {
-                $row[$column] = $this->getStoreId($row[$column], $column);
+        $this->initStores();
+
+        foreach ($importData as &$row) {
+            foreach ($applyTo as $columnName) {
+                if (isset($row[$columnName])) {
+                    $row[$columnName] = $this->getStoreId($row[$columnName], $columnName);
+                }
             }
         }
+        unset($row);
 
-        return $importData->{ImportDataInterface::DATA} = $rows;
+        return $importData;
     }
 
     /**
@@ -77,10 +75,12 @@ class StoreViewCodeToId implements ConvertingRuleProcessorInterface
     {
         if (!isset($this->storeCodeToId[$storeCode])) {
             throw new NotFoundException(__(
-                'The converting rule apply_to cannot be applied to the column: "%column". Store code "%code%" not exists', [
+                'The converting rule apply_to cannot be applied to the column: "%column". Store code "%code%" not exists',
+                [
                     'column' => $column,
                     'code' => $storeCode
-            ]));
+                ]
+            ));
         }
 
         return $this->storeManager[$storeCode];
@@ -93,7 +93,7 @@ class StoreViewCodeToId implements ConvertingRuleProcessorInterface
      */
     protected function initStores()
     {
-        foreach ($this->storeManager->getStores() as $store) {
+        foreach ($this->storeManager->getStores(true) as $store) {
             $this->storeCodeToId[$store->getCode()] = $store->getId();
         }
         return $this;
